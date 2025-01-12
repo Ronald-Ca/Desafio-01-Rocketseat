@@ -1,0 +1,93 @@
+import { randomUUID } from 'node:crypto'
+import { Database } from './database.js'
+import { buildRoutePath } from './utils/build-route-path.js'
+
+const database = new Database()
+
+export const routes = [
+    {
+        method: 'GET',
+        path: buildRoutePath('/tasks'),
+        handler: async (req, res) => {
+
+            const { search } = req.query
+
+            const searchQuery = search
+            ? { title: search, description: search }
+            : undefined
+
+            const tasks = database.select('tasks',  searchQuery)
+            
+            return res.setHeader('Content-type', 'application/json').end(JSON.stringify(tasks))
+        }
+    },
+    {
+        method: 'POST',
+        path: buildRoutePath('/tasks'),
+        handler: async (req, res) => {
+            const { title, description } = req.body
+
+            const task = {
+                id: randomUUID(),
+                title,
+                description,
+                completed_at: null,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            }
+            
+            database.insert('tasks', task)
+
+            return res.writeHead(201).end()
+        }
+    },
+    {
+        method: 'PUT',
+        path: buildRoutePath('/tasks/:id'),
+        handler: async (req, res) => {
+            const { id } = req.params
+    
+            const task = database.select('tasks').find(task => task.id === id)
+            if (!task) return res.writeHead(404).end('Task not found')
+    
+            const { title, description } = req.body
+    
+            database.update('tasks', id, { title, description })
+    
+            return res.writeHead(204).end()
+        }
+    },
+    {
+        method: 'DELETE',
+        path: buildRoutePath('/tasks/:id'),
+        handler: async (req, res) => {
+            const { id } = req.params
+
+            const task = database.select('tasks').find(task => task.id === id)
+            if (!task) return res.writeHead(404).end('Task not found')
+
+            database.delete('tasks', id)
+
+            return res.writeHead(204).end()
+        }
+    },
+    {
+        method: 'PATCH',
+        path: buildRoutePath('/tasks/:id/complete'),
+        handler: async (req, res) => {
+            const { id } = req.params
+    
+            const task = database.select('tasks').find(task => task.id === id)
+            if (!task) return res.writeHead(404).end('Task not found')
+            
+    
+            const isTaskCompleted = !!task.completed_at
+            database.update('tasks', id, {
+                completed_at: isTaskCompleted ? null : new Date().toISOString(),
+            })
+    
+            return res.writeHead(204).end()
+        }
+    }
+    
+]
