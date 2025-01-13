@@ -4,10 +4,14 @@
   "type": "module",
   "description": "",
   "main": "index.js",
- "scripts": {
+  "scripts": {
     "dev": "node --watch src/server.js"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "csv-parse": "^5.6.0",
+    "node-fetch": "^3.3.2"
+  }
 }

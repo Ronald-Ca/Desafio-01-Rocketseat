@@ -18,7 +18,7 @@ export class Database {
     }
 
     select(table, search) {
-        let data = this.#database[table] ?? [];
+        let data = this.#database[table] ?? []
     
         if (search) {
             data = data.filter(row => {
@@ -26,12 +26,12 @@ export class Database {
                     return (
                         typeof row[key] === 'string' &&
                         row[key].toLowerCase().includes(value.toLowerCase())
-                    );
-                });
-            });
+                    )
+                })
+            })
         }
     
-        return data;
+        return data
     }
     
 
