@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { Database } from './database.js'
 import { buildRoutePath } from './utils/build-route-path.js'
+import { validateDescription, validateTitle } from './utils/validator.js'
 
 const database = new Database()
 
@@ -26,20 +27,26 @@ export const routes = [
         path: buildRoutePath('/tasks'),
         handler: async (req, res) => {
             const { title, description } = req.body
-
+    
+            const titleValidation = validateTitle(title)
+            if (!titleValidation.isValid) return res.writeHead(400).end(titleValidation.message)
+    
+            const descriptionValidation = validateDescription(description)
+            if (!descriptionValidation.isValid) return res.writeHead(400).end(descriptionValidation.message)
+    
             const task = {
                 id: randomUUID(),
                 title,
                 description,
                 completed_at: null,
                 created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
+                updated_at: new Date().toISOString(),
             }
-            
+    
             database.insert('tasks', task)
-
+    
             return res.writeHead(201).end()
-        }
+        },
     },
     {
         method: 'PUT',
